@@ -1,0 +1,28 @@
+/* Add to bottom of style.css */
+fieldset {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 1.5em;
+    margin-bottom: 2em;
+    background-color: #fcfcfc;
+}
+
+legend {
+    font-weight: bold;
+    font-size: 1.2em;
+    padding: 0 0.5em;
+    color: var(--va-red);
+}
+
+.disclaimer {
+    font-size: 0.8em;
+    color: #666;
+    background-color: #f0f0f0;
+    padding: 0.5em;
+    border-radius: 4px;
+    margin-top: -0.5em;
+}
+
+.conditional-field {
+    margin-top: 1em;
+}
