@@ -1,11 +1,14 @@
-// Service Worker and IndexedDB setup (no changes needed from previous version)
+// Service Worker Registration
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
+        // Use a relative path for the service worker
         navigator.serviceWorker.register('sw.js')
             .then(reg => console.log('Service Worker: Registered'))
             .catch(err => console.log(`Service Worker: Error: ${err}`));
     });
 }
+
+// --- IndexedDB Setup ---
 const DB_NAME = 'form-submissions-db';
 const STORE_NAME = 'submissions';
 let db;
@@ -17,7 +20,7 @@ function initDB() {
             db = event.target.result;
             resolve();
         };
-        request.onupgradeded = (event) => {
+        request.onupgradeneeded = (event) => {
             const db = event.target.result;
             db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
         };
@@ -31,18 +34,20 @@ const webhookUrl = 'https://hooks.airtable.com/workflows/v1/genericWebhook/appwY
 
 // --- Conditional Field Logic ---
 function setupConditionalFields() {
-    // Show/hide based on dropdown selection
     const setupVisibilityToggle = (selectId, wrapperId, triggerValue) => {
         const selectElement = document.getElementById(selectId);
         const wrapperElement = document.getElementById(wrapperId);
-        wrapperElement.style.display = 'none'; // Hide by default
-        selectElement.addEventListener('change', () => {
-            if (selectElement.value === triggerValue) {
+        if (!selectElement || !wrapperElement) return;
+
+        const checkVisibility = () => {
+             if (selectElement.value === triggerValue) {
                 wrapperElement.style.display = 'block';
             } else {
                 wrapperElement.style.display = 'none';
             }
-        });
+        };
+        checkVisibility(); // Check on initial load
+        selectElement.addEventListener('change', checkVisibility);
     };
 
     // Report Type specific fields
@@ -55,7 +60,6 @@ function setupConditionalFields() {
     setupVisibilityToggle('hasFatigueReport', 'fatigue-ref-wrapper', 'Yes');
     setupVisibilityToggle('hasSafetyReport', 'safety-ref-wrapper', 'Yes');
 }
-
 
 // --- App Initialization ---
 document.addEventListener('DOMContentLoaded', async () => {
@@ -73,7 +77,6 @@ form.addEventListener('submit', async (event) => {
     const attachmentInput = document.getElementById('Attachments');
     const attachmentName = attachmentInput.files.length > 0 ? attachmentInput.files[0].name : '';
 
-    // Create the submission object with keys matching Airtable field names
     const submission = {
         "First Name": document.getElementById('FirstName').value,
         "Last Name": document.getElementById('LastName').value,
@@ -92,35 +95,27 @@ form.addEventListener('submit', async (event) => {
         "Have you submitted a company safety report?": document.getElementById('hasSafetyReport').value,
         "What is your safety report reference number?": document.getElementById('SafetyRefNumber').value,
         "Copy and paste body of Virgin Australia report here": document.getElementById('ReportBody').value,
-        "Attachments": attachmentName // Storing filename only
+        "Attachments": attachmentName
     };
     
     await saveSubmission(submission);
     form.reset();
-    // Re-hide conditional fields after reset
-    setupConditionalFields();
+    setupConditionalFields(); // Re-hide fields after reset
     await displayPendingSubmissions();
 });
 
-// --- Database and Sync Functions (no changes needed) ---
+// --- Database and Sync Functions ---
 async function saveSubmission(submission) {
-    return new Promise((resolve, reject) => {
-        const transaction = db.transaction([STORE_NAME], 'readwrite');
-        const store = transaction.objectStore(STORE_NAME);
-        const request = store.add(submission);
-        request.onsuccess = () => resolve();
-        request.onerror = (event) => reject("Error saving submission: " + event.target.error);
-    });
+    const transaction = db.transaction([STORE_NAME], 'readwrite');
+    const store = transaction.objectStore(STORE_NAME);
+    store.add(submission);
+    return transaction.complete;
 }
 
 async function getPendingSubmissions() {
-    return new Promise((resolve, reject) => {
-        const transaction = db.transaction([STORE_NAME], 'readonly');
-        const store = transaction.objectStore(STORE_NAME);
-        const request = store.getAll();
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = (event) => reject("Error fetching submissions: " + event.target.error);
-    });
+    const transaction = db.transaction([STORE_NAME], 'readonly');
+    const store = transaction.objectStore(STORE_NAME);
+    return store.getAll();
 }
 
 async function displayPendingSubmissions() {
@@ -131,7 +126,6 @@ async function displayPendingSubmissions() {
     } else {
         submissions.forEach(sub => {
             const li = document.createElement('li');
-            // Use bracket notation for keys with spaces
             li.textContent = `Report from ${sub["First Name"]} (${sub["Report Type"]})`;
             li.className = 'status-pending';
             submissionList.appendChild(li);
@@ -165,13 +159,10 @@ async function syncSubmissions() {
 }
 
 async function deleteSubmission(id) {
-    return new Promise((resolve, reject) => {
-        const transaction = db.transaction([STORE_NAME], 'readwrite');
-        const store = transaction.objectStore(STORE_NAME);
-        const request = store.delete(id);
-        request.onsuccess = () => resolve();
-        request.onerror = (event) => reject("Error deleting submission: " + event.target.error);
-    });
+    const transaction = db.transaction([STORE_NAME], 'readwrite');
+    const store = transaction.objectStore(STORE_NAME);
+    store.delete(id);
+    return transaction.complete;
 }
 
 window.addEventListener('online', syncSubmissions);
