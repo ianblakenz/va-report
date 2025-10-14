@@ -43,10 +43,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         await initDB();
         setupConditionalFields();
         await displayPendingSubmissions();
-        handleConnectionChange(); // Set initial state for attachments/sync
-        if (navigator.onLine) {
-            await syncSubmissions();
-        }
+        handleConnectionChange(); // Set initial state for attachments/sync button
     } catch (error) {
         console.error("Initialization failed:", error);
     }
@@ -84,7 +81,9 @@ form.addEventListener('submit', async (event) => {
     await displayPendingSubmissions();
 });
 
+// Sync is now ONLY triggered by this button click
 syncButton.addEventListener('click', syncSubmissions);
+
 window.addEventListener('online', handleConnectionChange);
 window.addEventListener('offline', handleConnectionChange);
 
@@ -94,11 +93,11 @@ function handleConnectionChange() {
     attachmentInput.disabled = !isOnline;
     attachmentNote.textContent = isOnline ? '(Online connection required)' : '(Disabled while offline)';
     
-    displayPendingSubmissions(); // Re-check to show/hide sync button
+    // This function will now only update the UI, not trigger a sync
+    displayPendingSubmissions(); 
     
     if (isOnline) {
-        console.log("Browser is online.");
-        syncSubmissions();
+        console.log("Browser is online. Manual sync is available.");
     } else {
         console.log("Browser is offline.");
     }
@@ -138,8 +137,9 @@ async function displayPendingSubmissions() {
         if (submissions.length === 0) {
             submissionList.innerHTML = '<li>No pending reports.</li>';
         } else {
+            // Only show the sync button if online AND there are items to sync
             if (navigator.onLine) {
-                syncButton.hidden = false; // Show sync button if online and pending items exist
+                syncButton.hidden = false; 
             }
             submissions.forEach(sub => {
                 const li = document.createElement('li');
@@ -156,6 +156,7 @@ async function displayPendingSubmissions() {
 async function syncSubmissions() {
     const submissions = await getPendingSubmissions();
     if (submissions.length === 0 || !navigator.onLine) {
+        syncMessage.textContent = 'Nothing to sync or you are offline.';
         return;
     }
 
@@ -178,13 +179,13 @@ async function syncSubmissions() {
             console.error('Network error during sync:', error);
             syncMessage.textContent = 'Sync failed. Check your connection.';
             syncButton.disabled = false;
-            return; // Stop if network fails
+            return; 
         }
     }
 
     syncMessage.textContent = 'Sync complete!';
     syncButton.disabled = false;
-    await displayPendingSubmissions(); // Refresh the list
+    await displayPendingSubmissions(); // Refresh the list, which will hide the button
 }
 
 // --- Database Functions ---
