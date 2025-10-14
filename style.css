@@ -1,4 +1,113 @@
-/* Add to bottom of style.css */
+:root {
+    --va-red: #E60000;
+    --va-silver: #F1F3F4;
+    --va-dark-grey: #333333;
+    --va-medium-grey: #5A5A5A;
+    --va-light-grey: #ccc;
+    --va-white: #FFFFFF;
+    --status-pending: #ffa500;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    margin: 0;
+    background-color: var(--va-silver);
+    color: var(--va-dark-grey);
+}
+
+header {
+    background-color: var(--va-red);
+    color: var(--va-white);
+    padding: 1.5em;
+    text-align: center;
+}
+
+header h1 { margin: 0; }
+header p { opacity: 0.9; }
+
+main {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 1em;
+}
+
+form {
+    background: var(--va-white);
+    padding: 2em;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5em;
+    font-weight: bold;
+    color: var(--va-medium-grey);
+}
+
+input, textarea, select {
+    width: 100%;
+    padding: 0.8em;
+    margin-bottom: 1.2em;
+    border: 1px solid var(--va-light-grey);
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 1em;
+}
+
+input:focus, textarea:focus, select:focus {
+    outline: 2px solid var(--va-red);
+    border-color: var(--va-red);
+}
+
+.form-row {
+    display: flex;
+    gap: 1em;
+}
+
+.form-group {
+    flex: 1;
+}
+
+button {
+    width: 100%;
+    padding: 1em;
+    background-color: var(--va-red);
+    color: var(--va-white);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1.1em;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+button:hover {
+    background-color: #c40000; /* Darker red on hover */
+}
+
+.submissions {
+    margin-top: 2em;
+}
+
+#submission-list li {
+    background: var(--va-white);
+    padding: 1em;
+    margin-bottom: 0.5em;
+    border-radius: 4px;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-left: 5px solid var(--status-pending);
+}
+
+.status-pending::after {
+    content: '⏳ Waiting';
+    color: var(--status-pending);
+    font-weight: bold;
+}
+
 fieldset {
     border: 1px solid #ddd;
     border-radius: 8px;
