@@ -1,11 +1,11 @@
 {
-  "name": "Offline Form PWA",
-  "short_name": "OfflineForm",
+  "name": "Offline Crew Report",
+  "short_name": "Crew Report",
   "start_url": ".",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#3367D6",
-  "description": "A PWA that submits forms offline and syncs later.",
+  "background_color": "#F1F3F4",
+  "theme_color": "#E60000",
+  "description": "An offline-first crew reporting form.",
   "icons": [
     {
       "src": "https://www.gstatic.com/images/branding/product/1x/drive_2020q4_48dp.png",
