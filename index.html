@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline Crew Report</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#E60000"/>
+</head>
+<body>
+    <header>
+        <h1>Crew Report Form</h1>
+        <p>This form works offline. Your report will be sent when you reconnect.</p>
+    </header>
+
+    <main>
+        <form id="airtable-form">
+            <fieldset>
+                <legend>Your Details</legend>
+                <label for="FirstName">First Name</label>
+                <input type="text" id="FirstName" name="FirstName" required>
+
+                <label for="LastName">Last Name</label>
+                <input type="text" id="LastName" name="LastName" required>
+
+                <label for="StaffNumber">Staff Number</label>
+                <input type="number" id="StaffNumber" name="StaffNumber" required>
+
+                <label for="Email2">Email</label>
+                <input type="email" id="Email2" name="Email2" required>
+
+                <label for="PhoneNumber">Phone Number</label>
+                <input type="tel" id="PhoneNumber" name="PhoneNumber">
+                
+                <label for="Base">Base</label>
+                <select id="Base" name="Base" required>
+                    <option value="" disabled selected>Select your base...</option>
+                    <option value="Melbourne">Melbourne</option>
+                    <option value="Brisbane">Brisbane</option>
+                    <option value="Sydney">Sydney</option>
+                    <option value="Perth">Perth</option>
+                    <option value="Adelaide">Adelaide</option>
+                </select>
+            </fieldset>
+
+            <fieldset>
+                <legend>Report Details</legend>
+                <label for="ReportType">Report Type</label>
+                <select id="ReportType" name="ReportType" required>
+                    <option value="" disabled selected>Select a report type...</option>
+                    <option value="Breach of EBA">Breach of EBA</option>
+                    <option value="Rostering feedback">Rostering feedback</option>
+                    <option value="Part time 80 rosters">Part time 80 rosters</option>
+                    <option value="Safety">Safety</option>
+                    <option value="Hotel Issues">Hotel Issues</option>
+                    <option value="Fatigue">Fatigue</option>
+                    <option value="Crewing disputes">Crewing disputes</option>
+                    <option value="Feedback (2 sector, 12 hour days)">Feedback (2 sector, 12 hour days)</option>
+                    <option value="WHS Issue">WHS Issue</option>
+                    <option value="Other">Other</option>
+                </select>
+
+                <div class="conditional-field" id="other-report-wrapper">
+                    <label for="OtherReportType">Other - Please describe report type</label>
+                    <textarea id="OtherReportType" name="Other - Please describe report type" rows="3"></textarea>
+                </div>
+
+                <div class="conditional-field" id="hotel-issue-wrapper">
+                    <label for="WhichPortAndHotel">Which port and hotel?</label>
+                    <textarea id="WhichPortAndHotel" name="Which port and hotel?" rows="3"></textarea>
+                </div>
+                 <div class="conditional-field" id="eba-breach-wrapper">
+                    <label for="EbaClause">Which clause of the EBA do you think was breached</label>
+                    <textarea id="EbaClause" name="Which clause of the EBA do you think was breached" rows="3"></textarea>
+                </div>
+            </fieldset>
+
+            <fieldset>
+                <legend>Company Reports</legend>
+                <label for="hasApiReport">Have you submitted a company API report?</label>
+                <select id="hasApiReport" name="hasApiReport">
+                    <option value="No" selected>No</option>
+                    <option value="Yes">Yes</option>
+                </select>
+                <div class="conditional-field" id="api-ref-wrapper">
+                    <label for="ApiRefNumber">What is your API report reference number?</label>
+                    <input type="text" id="ApiRefNumber" name="What is your API report reference number?">
+                </div>
+
+                <label for="hasFatigueReport">Have you submitted a fatigue report?</label>
+                <select id="hasFatigueReport" name="hasFatigueReport">
+                    <option value="No" selected>No</option>
+                    <option value="Yes">Yes</option>
+                </select>
+                <div class="conditional-field" id="fatigue-ref-wrapper">
+                    <label for="FatigueRefNumber">What is your fatigue report reference number?</label>
+                    <textarea id="FatigueRefNumber" name="What is your fatigue report reference number?" rows="2"></textarea>
+                </div>
+
+                <label for="hasSafetyReport">Have you submitted a company safety report?</label>
+                <select id="hasSafetyReport" name="hasSafetyReport">
+                    <option value="No" selected>No</option>
+                    <option value="Yes">Yes</option>
+                </select>
+                <div class="conditional-field" id="safety-ref-wrapper">
+                    <label for="SafetyRefNumber">What is your safety report reference number?</label>
+                    <textarea id="SafetyRefNumber" name="What is your safety report reference number?" rows="2"></textarea>
+                </div>
+            </fieldset>
+
+            <fieldset>
+                <legend>Report Body</legend>
+                <label for="ReportBody">Copy and paste body of Virgin Australia report here</label>
+                <textarea id="ReportBody" name="Copy and paste body of Virgin Australia report here" rows="8"></textarea>
+                
+                <label for="Attachments">Attachments</label>
+                <input type="file" id="Attachments" name="Attachments">
+                <p class="disclaimer"><strong>Note:</strong> Due to offline limitations, only the file name will be recorded, not the file itself.</p>
+
+            </fieldset>
+            
+            <button type="submit">Submit Report</button>
+        </form>
+
+        <section class="submissions">
+            <h2>Pending Submissions</h2>
+            <ul id="submission-list">
+                </ul>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
