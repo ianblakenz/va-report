@@ -1,13 +1,13 @@
 // A name for our cache
 const CACHE_NAME = 'pwa-cache-v1';
 
-// A list of all the files we want to cache for offline use
+// This is the NEW list with correct relative paths
 const FILES_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/style.css',
-  '/app.js',
-  '/manifest.json'
+  '.',
+  'index.html',
+  'style.css',
+  'app.js',
+  'manifest.json'
 ];
 
 // This event fires when the service worker is installed
