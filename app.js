@@ -1,7 +1,7 @@
 // Service Worker Registration
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js')
+        navigator.service-worker.register('sw.js')
             .then(reg => console.log('Service Worker: Registered'))
             .catch(err => console.log(`Service Worker: Error: ${err}`));
     });
@@ -13,6 +13,7 @@ const STORE_NAME = 'submissions';
 let db;
 function initDB() {
     return new Promise((resolve, reject) => {
+        // Version 2 ensures the database structure is correctly updated
         const request = indexedDB.open(DB_NAME, 2); 
         request.onerror = (event) => reject("IndexedDB error: " + event.target.errorCode);
         request.onsuccess = (event) => {
@@ -31,7 +32,8 @@ function initDB() {
 // --- DOM Elements ---
 const form = document.getElementById('airtable-form');
 const submissionList = document.getElementById('submission-list');
-const webhookUrl = 'https://hooks.airtable.com/workflows/v1/genericWebhook/appwYah1izUq3klHj/wfl1d1R2qZdQA0txX/wtr3MJYEmJ9g8OjVI';
+// The webhook URL with the CORS proxy fix applied
+const webhookUrl = 'https://cors-anywhere.herokuapp.com/https://hooks.airtable.com/workflows/v1/genericWebhook/appwYah1izUq3klHj/wfl1d1R2qZdQA0txX/wtr3MJYEmJ9g8OjVI';
 const attachmentInput = document.getElementById('Attachments');
 const attachmentNote = document.getElementById('attachment-note');
 const syncButton = document.getElementById('sync-button');
@@ -43,10 +45,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         await initDB();
         setupConditionalFields();
         await displayPendingSubmissions();
-        handleConnectionChange(); // Set initial state for attachments/sync
-        if (navigator.onLine) {
-            await syncSubmissions();
-        }
+        handleConnectionChange(); // Set initial state for attachments/sync button
     } catch (error) {
         console.error("Initialization failed:", error);
     }
@@ -84,7 +83,9 @@ form.addEventListener('submit', async (event) => {
     await displayPendingSubmissions();
 });
 
+// Sync is now ONLY triggered by this button click
 syncButton.addEventListener('click', syncSubmissions);
+
 window.addEventListener('online', handleConnectionChange);
 window.addEventListener('offline', handleConnectionChange);
 
@@ -94,11 +95,11 @@ function handleConnectionChange() {
     attachmentInput.disabled = !isOnline;
     attachmentNote.textContent = isOnline ? '(Online connection required)' : '(Disabled while offline)';
     
-    displayPendingSubmissions(); // Re-check to show/hide sync button
+    // This function will now only update the UI, not trigger a sync
+    displayPendingSubmissions(); 
     
     if (isOnline) {
-        console.log("Browser is online.");
-        syncSubmissions();
+        console.log("Browser is online. Manual sync is available.");
     } else {
         console.log("Browser is offline.");
     }
@@ -138,8 +139,9 @@ async function displayPendingSubmissions() {
         if (submissions.length === 0) {
             submissionList.innerHTML = '<li>No pending reports.</li>';
         } else {
+            // Only show the sync button if online AND there are items to sync
             if (navigator.onLine) {
-                syncButton.hidden = false; // Show sync button if online and pending items exist
+                syncButton.hidden = false; 
             }
             submissions.forEach(sub => {
                 const li = document.createElement('li');
@@ -156,6 +158,7 @@ async function displayPendingSubmissions() {
 async function syncSubmissions() {
     const submissions = await getPendingSubmissions();
     if (submissions.length === 0 || !navigator.onLine) {
+        syncMessage.textContent = 'Nothing to sync or you are offline.';
         return;
     }
 
@@ -172,19 +175,24 @@ async function syncSubmissions() {
             if (response.ok) {
                 await deleteSubmission(sub.id);
             } else {
+                // If the fetch fails but not due to a network error (e.g., 400/500 error)
                 console.error(`Failed to submit data for ID ${sub.id}:`, response.statusText);
+                syncMessage.textContent = `Error: ${response.statusText}. Submission failed.`;
+                syncButton.disabled = false;
+                return; 
             }
         } catch (error) {
+            // This catches network errors (like CORS issues, DNS failures)
             console.error('Network error during sync:', error);
-            syncMessage.textContent = 'Sync failed. Check your connection.';
+            syncMessage.textContent = 'Sync failed. Check console for CORS error.';
             syncButton.disabled = false;
-            return; // Stop if network fails
+            return; 
         }
     }
 
     syncMessage.textContent = 'Sync complete!';
     syncButton.disabled = false;
-    await displayPendingSubmissions(); // Refresh the list
+    await displayPendingSubmissions(); // Refresh the list, which will hide the button
 }
 
 // --- Database Functions ---
