@@ -1,7 +1,6 @@
 // Service Worker Registration
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        // Use a relative path for the service worker
         navigator.serviceWorker.register('sw.js')
             .then(reg => console.log('Service Worker: Registered'))
             .catch(err => console.log(`Service Worker: Error: ${err}`));
@@ -12,65 +11,31 @@ if ('serviceWorker' in navigator) {
 const DB_NAME = 'form-submissions-db';
 const STORE_NAME = 'submissions';
 let db;
-
 function initDB() {
     return new Promise((resolve, reject) => {
-        // IMPORTANT: Version is now 2 to trigger the upgrade
         const request = indexedDB.open(DB_NAME, 2); 
-
-        request.onerror = (event) => {
-            console.error("IndexedDB error:", event.target.errorCode);
-            reject("IndexedDB error: " + event.target.errorCode);
-        };
-
+        request.onerror = (event) => reject("IndexedDB error: " + event.target.errorCode);
         request.onsuccess = (event) => {
             db = event.target.result;
-            console.log("Database opened successfully.");
             resolve();
         };
-
-        // CORRECTED: onupgradeneeded was misspelled before
         request.onupgradeneeded = (event) => {
-            console.log("Database upgrade needed.");
             const db = event.target.result;
             if (!db.objectStoreNames.contains(STORE_NAME)) {
                 db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
-                console.log("Object store created.");
             }
         };
     });
 }
 
-// --- Main Application Logic ---
+// --- DOM Elements ---
 const form = document.getElementById('airtable-form');
 const submissionList = document.getElementById('submission-list');
 const webhookUrl = 'https://hooks.airtable.com/workflows/v1/genericWebhook/appwYah1izUq3klHj/wfl1d1R2qZdQA0txX/wtr3MJYEmJ9g8OjVI';
-
-// --- Conditional Field Logic ---
-function setupConditionalFields() {
-    const setupVisibilityToggle = (selectId, wrapperId, triggerValue) => {
-        const selectElement = document.getElementById(selectId);
-        const wrapperElement = document.getElementById(wrapperId);
-        if (!selectElement || !wrapperElement) return;
-
-        const checkVisibility = () => {
-             if (selectElement.value === triggerValue) {
-                wrapperElement.style.display = 'block';
-            } else {
-                wrapperElement.style.display = 'none';
-            }
-        };
-        checkVisibility(); // Check on initial load
-        selectElement.addEventListener('change', checkVisibility);
-    };
-
-    setupVisibilityToggle('ReportType', 'other-report-wrapper', 'Other');
-    setupVisibilityToggle('ReportType', 'hotel-issue-wrapper', 'Hotel Issues');
-    setupVisibilityToggle('ReportType', 'eba-breach-wrapper', 'Breach of EBA');
-    setupVisibilityToggle('hasApiReport', 'api-ref-wrapper', 'Yes');
-    setupVisibilityToggle('hasFatigueReport', 'fatigue-ref-wrapper', 'Yes');
-    setupVisibilityToggle('hasSafetyReport', 'safety-ref-wrapper', 'Yes');
-}
+const attachmentInput = document.getElementById('Attachments');
+const attachmentNote = document.getElementById('attachment-note');
+const syncButton = document.getElementById('sync-button');
+const syncMessage = document.getElementById('sync-message');
 
 // --- App Initialization ---
 document.addEventListener('DOMContentLoaded', async () => {
@@ -78,8 +43,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         await initDB();
         setupConditionalFields();
         await displayPendingSubmissions();
+        handleConnectionChange(); // Set initial state for attachments/sync
         if (navigator.onLine) {
-            console.log("Online on load, attempting sync.");
             await syncSubmissions();
         }
     } catch (error) {
@@ -87,10 +52,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
+// --- Event Listeners ---
 form.addEventListener('submit', async (event) => {
     event.preventDefault();
-    
-    const attachmentInput = document.getElementById('Attachments');
     const attachmentName = attachmentInput.files.length > 0 ? attachmentInput.files[0].name : '';
 
     const submission = {
@@ -120,41 +84,63 @@ form.addEventListener('submit', async (event) => {
     await displayPendingSubmissions();
 });
 
-// --- Database and Sync Functions ---
-async function saveSubmission(submission) {
-    return new Promise((resolve, reject) => {
-        const transaction = db.transaction([STORE_NAME], 'readwrite');
-        const store = transaction.objectStore(STORE_NAME);
-        const request = store.add(submission);
-        request.onsuccess = () => {
-            console.log("Submission saved to IndexedDB.");
-            resolve(request.result);
-        };
-        request.onerror = (event) => {
-            console.error("Failed to save submission:", event.target.error);
-            reject(event.target.error);
-        };
-    });
+syncButton.addEventListener('click', syncSubmissions);
+window.addEventListener('online', handleConnectionChange);
+window.addEventListener('offline', handleConnectionChange);
+
+// --- Core Functions ---
+function handleConnectionChange() {
+    const isOnline = navigator.onLine;
+    attachmentInput.disabled = !isOnline;
+    attachmentNote.textContent = isOnline ? '(Online connection required)' : '(Disabled while offline)';
+    
+    displayPendingSubmissions(); // Re-check to show/hide sync button
+    
+    if (isOnline) {
+        console.log("Browser is online.");
+        syncSubmissions();
+    } else {
+        console.log("Browser is offline.");
+    }
 }
 
-async function getPendingSubmissions() {
-    return new Promise((resolve, reject) => {
-        const transaction = db.transaction([STORE_NAME], 'readonly');
-        const store = transaction.objectStore(STORE_NAME);
-        const request = store.getAll();
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = (event) => reject(event.target.error);
-    });
+function setupConditionalFields() {
+    const setupVisibilityToggle = (selectId, wrapperId, triggerValue) => {
+        const selectElement = document.getElementById(selectId);
+        const wrapperElement = document.getElementById(wrapperId);
+        if (!selectElement || !wrapperElement) return;
+
+        const checkVisibility = () => {
+             if (selectElement.value === triggerValue) {
+                wrapperElement.style.display = 'block';
+            } else {
+                wrapperElement.style.display = 'none';
+            }
+        };
+        checkVisibility(); 
+        selectElement.addEventListener('change', checkVisibility);
+    };
+    setupVisibilityToggle('ReportType', 'other-report-wrapper', 'Other');
+    setupVisibilityToggle('ReportType', 'hotel-issue-wrapper', 'Hotel Issues');
+    setupVisibilityToggle('ReportType', 'eba-breach-wrapper', 'Breach of EBA');
+    setupVisibilityToggle('hasApiReport', 'api-ref-wrapper', 'Yes');
+    setupVisibilityToggle('hasFatigueReport', 'fatigue-ref-wrapper', 'Yes');
+    setupVisibilityToggle('hasSafetyReport', 'safety-ref-wrapper', 'Yes');
 }
 
 async function displayPendingSubmissions() {
     try {
         const submissions = await getPendingSubmissions();
         submissionList.innerHTML = '';
+        syncButton.hidden = true;
+        syncMessage.textContent = '';
+
         if (submissions.length === 0) {
             submissionList.innerHTML = '<li>No pending reports.</li>';
         } else {
-            console.log(`Displaying ${submissions.length} pending submissions.`);
+            if (navigator.onLine) {
+                syncButton.hidden = false; // Show sync button if online and pending items exist
+            }
             submissions.forEach(sub => {
                 const li = document.createElement('li');
                 li.textContent = `Report from ${sub["First Name"]} (${sub["Report Type"]})`;
@@ -169,11 +155,13 @@ async function displayPendingSubmissions() {
 
 async function syncSubmissions() {
     const submissions = await getPendingSubmissions();
-    if (submissions.length === 0) {
-        console.log("No submissions to sync.");
+    if (submissions.length === 0 || !navigator.onLine) {
         return;
     }
-    console.log(`Syncing ${submissions.length} submissions...`);
+
+    syncMessage.textContent = `Syncing ${submissions.length} report(s)...`;
+    syncButton.disabled = true;
+
     for (const sub of submissions) {
         try {
             const response = await fetch(webhookUrl, {
@@ -182,18 +170,42 @@ async function syncSubmissions() {
                 body: JSON.stringify(sub)
             });
             if (response.ok) {
-                console.log(`Submission ${sub.id} synced successfully.`);
                 await deleteSubmission(sub.id);
             } else {
                 console.error(`Failed to submit data for ID ${sub.id}:`, response.statusText);
             }
         } catch (error) {
             console.error('Network error during sync:', error);
+            syncMessage.textContent = 'Sync failed. Check your connection.';
+            syncButton.disabled = false;
             return; // Stop if network fails
         }
     }
-    console.log('Sync complete.');
-    await displayPendingSubmissions();
+
+    syncMessage.textContent = 'Sync complete!';
+    syncButton.disabled = false;
+    await displayPendingSubmissions(); // Refresh the list
+}
+
+// --- Database Functions ---
+async function saveSubmission(submission) {
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction([STORE_NAME], 'readwrite');
+        const store = transaction.objectStore(STORE_NAME);
+        const request = store.add(submission);
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = (event) => reject(event.target.error);
+    });
+}
+
+async function getPendingSubmissions() {
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction([STORE_NAME], 'readonly');
+        const store = transaction.objectStore(STORE_NAME);
+        const request = store.getAll();
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = (event) => reject(event.target.error);
+    });
 }
 
 async function deleteSubmission(id) {
@@ -201,19 +213,7 @@ async function deleteSubmission(id) {
         const transaction = db.transaction([STORE_NAME], 'readwrite');
         const store = transaction.objectStore(STORE_NAME);
         const request = store.delete(id);
-        request.onsuccess = () => {
-            console.log(`Deleted submission ${id} from IndexedDB.`);
-            resolve();
-        };
+        request.onsuccess = () => resolve();
         request.onerror = (event) => reject(event.target.error);
     });
 }
-
-window.addEventListener('online', () => {
-    console.log("Browser is online. Attempting to sync.");
-    syncSubmissions();
-});
-
-window.addEventListener('offline', () => {
-    console.log("Browser is offline.");
-});
