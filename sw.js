@@ -1,7 +1,7 @@
 // A name for our cache
-const CACHE_NAME = 'pwa-cache-v1';
+const CACHE_NAME = 'pwa-cache-v2'; // Incremented version to force update
 
-// This is the NEW list with correct relative paths
+// A list of all the files we want to cache, using relative paths
 const FILES_TO_CACHE = [
   '.',
   'index.html',
@@ -38,18 +38,12 @@ self.addEventListener('activate', (event) => {
 });
 
 // This event fires every time the app makes a network request
+// Using a "Network First" strategy for easy debugging. It tries the
+// network first, and if that fails, it serves from the cache.
 self.addEventListener('fetch', (event) => {
-  // We only want to handle navigation requests (page loads)
-  if (event.request.mode !== 'navigate') {
-    return;
-  }
   event.respondWith(
-      // Try to find a match in the cache first
-      caches.match(event.request)
-          .then((response) => {
-            // If we find a match in the cache, return it.
-            // Otherwise, try to fetch it from the network.
-            return response || fetch(event.request);
-          })
+    fetch(event.request).catch(() => {
+      return caches.match(event.request);
+    })
   );
 });
