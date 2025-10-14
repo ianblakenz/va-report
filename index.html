@@ -114,21 +114,29 @@
                 <label for="ReportBody">Copy and paste body of Virgin Australia report here</label>
                 <textarea id="ReportBody" name="Copy and paste body of Virgin Australia report here" rows="8"></textarea>
                 
-                <label for="Attachments">Attachments</label>
+                <label for="Attachments">Attachments <small id="attachment-note">(Online connection required)</small></label>
                 <input type="file" id="Attachments" name="Attachments">
                 <p class="disclaimer"><strong>Note:</strong> Due to offline limitations, only the file name will be recorded, not the file itself.</p>
 
             </fieldset>
-            
+
             <button type="submit">Submit Report</button>
         </form>
 
         <section class="submissions">
             <h2>Pending Submissions</h2>
+            <div id="sync-status" class="sync-wrapper">
+                <button id="sync-button" hidden>Sync Now</button>
+                <p id="sync-message"></p>
+            </div>
             <ul id="submission-list">
                 </ul>
         </section>
     </main>
+
+    <footer>
+        <p>Version 1.0.1</p>
+    </footer>
 
     <script src="app.js"></script>
 </body>
