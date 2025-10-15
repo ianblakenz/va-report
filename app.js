@@ -1,4 +1,4 @@
-// Service Worker Registration
+// --- Service Worker and DB Setup (No Changes) ---
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('sw.js')
@@ -6,19 +6,14 @@ if ('serviceWorker' in navigator) {
             .catch(err => console.log(`Service Worker: Error: ${err}`));
     });
 }
-
-// --- IndexedDB Setup ---
 const DB_NAME = 'form-submissions-db';
 const STORE_NAME = 'submissions';
 let db;
-function initDB() {
+function initDB() { /* ... same initDB function ... */
     return new Promise((resolve, reject) => {
         const request = indexedDB.open(DB_NAME, 2); 
         request.onerror = (event) => reject("IndexedDB error: " + event.target.errorCode);
-        request.onsuccess = (event) => {
-            db = event.target.result;
-            resolve();
-        };
+        request.onsuccess = (event) => { db = event.target.result; resolve(); };
         request.onupgradeneeded = (event) => {
             const db = event.target.result;
             if (!db.objectStoreNames.contains(STORE_NAME)) {
@@ -30,18 +25,27 @@ function initDB() {
 
 // --- DOM Elements ---
 const form = document.getElementById('airtable-form');
-const submissionList = document.getElementById('submission-list');
 const webhookUrl = 'https://hook.eu1.make.com/j0vb45873j47mawzhuhc8t6k9y4276k6';
+// UI Elements
+const submissionList = document.getElementById('submission-list');
 const attachmentInput = document.getElementById('Attachments');
 const attachmentNote = document.getElementById('attachment-note');
 const syncButton = document.getElementById('sync-button');
 const syncMessage = document.getElementById('sync-message');
+// Multi-Step Form Elements
+const steps = Array.from(document.querySelectorAll('.form-step'));
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const submitBtn = document.getElementById('submitBtn');
+const progressSteps = Array.from(document.querySelectorAll('.progress-bar .step'));
+let currentStep = 0;
 
 // --- App Initialization ---
 document.addEventListener('DOMContentLoaded', async () => {
     try {
         await initDB();
-        setupConditionalFields();
+        setupButtonGroups();
+        setupMultiStepForm();
         await displayPendingSubmissions();
         handleConnectionChange(); 
     } catch (error) {
@@ -49,7 +53,67 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-// --- Event Listeners ---
+// --- Multi-Step Form Logic ---
+function setupMulti-stepForm() {
+    showStep(currentStep);
+    nextBtn.addEventListener('click', () => {
+        if (currentStep < steps.length - 1) {
+            currentStep++;
+            showStep(currentStep);
+        }
+    });
+    prevBtn.addEventListener('click', () => {
+        if (currentStep > 0) {
+            currentStep--;
+            showStep(currentStep);
+        }
+    });
+}
+
+function showStep(stepIndex) {
+    steps.forEach((step, index) => {
+        step.classList.toggle('active-step', index === stepIndex);
+    });
+    progressSteps.forEach((step, index) => {
+        step.classList.toggle('active', index <= stepIndex);
+    });
+    prevBtn.style.display = stepIndex === 0 ? 'none' : 'inline-block';
+    nextBtn.style.display = stepIndex === steps.length - 1 ? 'none' : 'inline-block';
+    submitBtn.style.display = stepIndex === steps.length - 1 ? 'inline-block' : 'none';
+}
+
+// --- Button Dropdown & Conditional Logic ---
+function setupButtonGroups() {
+    const buttonGroups = document.querySelectorAll('.button-group');
+    buttonGroups.forEach(group => {
+        const buttons = group.querySelectorAll('.option-button');
+        const hiddenInput = group.nextElementSibling;
+
+        buttons.forEach(button => {
+            button.addEventListener('click', () => {
+                buttons.forEach(btn => btn.classList.remove('selected'));
+                button.classList.add('selected');
+                hiddenInput.value = button.dataset.value;
+                // Trigger conditional field check
+                handleConditionalFields(hiddenInput.id, hiddenInput.value);
+            });
+        });
+    });
+}
+
+function handleConditionalFields(inputId, selectedValue) {
+    const conditionalFields = document.querySelectorAll(`.conditional-field[data-condition="${inputId}"]`);
+    conditionalFields.forEach(field => {
+        if (field.dataset.conditionValue === selectedValue) {
+            field.style.display = 'block';
+        } else {
+            field.style.display = 'none';
+        }
+    });
+}
+
+
+// --- Form Submission ---
 form.addEventListener('submit', async (event) => {
     event.preventDefault();
     const file = attachmentInput.files.length > 0 ? attachmentInput.files[0] : null;
@@ -77,15 +141,19 @@ form.addEventListener('submit', async (event) => {
     };
     await saveSubmission(submission);
     form.reset();
-    setupConditionalFields(); 
+    // Reset form to first step
+    currentStep = 0;
+    showStep(currentStep);
+    // Reset button selections
+    document.querySelectorAll('.option-button.selected').forEach(b => b.classList.remove('selected'));
     await displayPendingSubmissions();
 });
 
+// --- Syncing and Connection Handling ---
 syncButton.addEventListener('click', syncSubmissions);
 window.addEventListener('online', handleConnectionChange);
 window.addEventListener('offline', handleConnectionChange);
 
-// --- Core Functions ---
 function handleConnectionChange() {
     const isOnline = navigator.onLine;
     attachmentInput.disabled = !isOnline;
@@ -93,27 +161,7 @@ function handleConnectionChange() {
     displayPendingSubmissions(); 
 }
 
-function setupConditionalFields() {
-    const setupVisibilityToggle = (selectId, wrapperId, triggerValue) => {
-        const selectElement = document.getElementById(selectId);
-        const wrapperElement = document.getElementById(wrapperId);
-        if (!selectElement || !wrapperElement) return;
-        const checkVisibility = () => {
-             if (selectElement.value === triggerValue) wrapperElement.style.display = 'block';
-             else wrapperElement.style.display = 'none';
-        };
-        checkVisibility(); 
-        selectElement.addEventListener('change', checkVisibility);
-    };
-    setupVisibilityToggle('ReportType', 'other-report-wrapper', 'Other');
-    setupVisibilityToggle('ReportType', 'hotel-issue-wrapper', 'Hotel Issues');
-    setupVisibilityToggle('ReportType', 'eba-breach-wrapper', 'Breach of EBA');
-    setupVisibilityToggle('hasApiReport', 'api-ref-wrapper', 'Yes');
-    setupVisibilityToggle('hasFatigueReport', 'fatigue-ref-wrapper', 'Yes');
-    setupVisibilityToggle('hasSafetyReport', 'safety-ref-wrapper', 'Yes');
-}
-
-async function displayPendingSubmissions() {
+async function displayPendingSubmissions() { /* ... same as before ... */
     const submissions = await getPendingSubmissions();
     submissionList.innerHTML = '';
     syncButton.hidden = true;
@@ -131,7 +179,7 @@ async function displayPendingSubmissions() {
     }
 }
 
-async function syncSubmissions() {
+async function syncSubmissions() { /* ... same as before ... */
     const submissions = await getPendingSubmissions();
     if (submissions.length === 0 || !navigator.onLine) return;
 
@@ -168,8 +216,8 @@ async function syncSubmissions() {
     await displayPendingSubmissions();
 }
 
-// --- ✅ CORRECTED Database Functions ---
-function saveSubmission(submission) {
+// --- Database Functions (No Changes) ---
+function saveSubmission(submission) { /* ... same as before ... */
     return new Promise((resolve, reject) => {
         const transaction = db.transaction([STORE_NAME], 'readwrite');
         transaction.onerror = (event) => reject(event.target.error);
@@ -178,7 +226,7 @@ function saveSubmission(submission) {
         request.onsuccess = () => resolve(request.result);
     });
 }
-function getPendingSubmissions() {
+function getPendingSubmissions() { /* ... same as before ... */
     return new Promise((resolve, reject) => {
         const transaction = db.transaction([STORE_NAME], 'readonly');
         transaction.onerror = (event) => reject(event.target.error);
@@ -187,7 +235,7 @@ function getPendingSubmissions() {
         request.onsuccess = () => resolve(request.result);
     });
 }
-function deleteSubmission(id) {
+function deleteSubmission(id) { /* ... same as before ... */
     return new Promise((resolve, reject) => {
         const transaction = db.transaction([STORE_NAME], 'readwrite');
         transaction.onerror = (event) => reject(event.target.error);

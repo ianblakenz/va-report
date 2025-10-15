@@ -3,20 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Offline Crew Report</title>
+    <title>FAAA VA Report</title>
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#E60000"/>
+    <meta name="theme-color" content="#002a6c"/>
 </head>
 <body>
     <header>
+        <img src="https://media.faaa.com.au/logo/faaa_logo.png" alt="FAAA Logo" class="header-logo">
         <h1>Crew Report Form</h1>
-        <p>This form works offline. Your report will be sent when you reconnect.</p>
     </header>
 
     <main>
         <form id="airtable-form">
-            <fieldset>
+            <!-- Progress Bar -->
+            <div class="progress-bar">
+                <div class="step active"></div>
+                <div class="step"></div>
+                <div class="step"></div>
+                <div class="step"></div>
+            </div>
+
+            <!-- Step 1: Your Details -->
+            <fieldset class="form-step active-step">
                 <legend>Your Details</legend>
                 <label for="FirstName">First Name</label>
                 <input type="text" id="FirstName" name="FirstName" required>
@@ -33,93 +42,101 @@
                 <label for="PhoneNumber">Phone Number</label>
                 <input type="tel" id="PhoneNumber" name="PhoneNumber">
                 
-                <label for="Base">Base</label>
-                <select id="Base" name="Base" required>
-                    <option value="" disabled selected>Select your base...</option>
-                    <option value="Melbourne">Melbourne</option>
-                    <option value="Brisbane">Brisbane</option>
-                    <option value="Sydney">Sydney</option>
-                    <option value="Perth">Perth</option>
-                    <option value="Adelaide">Adelaide</option>
-                </select>
+                <label>Base</label>
+                <div class="button-group">
+                    <button type="button" class="option-button" data-value="Melbourne">Melbourne</button>
+                    <button type="button" class="option-button" data-value="Brisbane">Brisbane</button>
+                    <button type="button" class="option-button" data-value="Sydney">Sydney</button>
+                    <button type="button" class="option-button" data-value="Perth">Perth</button>
+                    <button type="button" class="option-button" data-value="Adelaide">Adelaide</button>
+                </div>
+                <input type="hidden" id="Base" name="Base" required>
             </fieldset>
 
-            <fieldset>
+            <!-- Step 2: Report Details -->
+            <fieldset class="form-step">
                 <legend>Report Details</legend>
-                <label for="ReportType">Report Type</label>
-                <select id="ReportType" name="ReportType" required>
-                    <option value="" disabled selected>Select a report type...</option>
-                    <option value="Breach of EBA">Breach of EBA</option>
-                    <option value="Rostering feedback">Rostering feedback</option>
-                    <option value="Part time 80 rosters">Part time 80 rosters</option>
-                    <option value="Safety">Safety</option>
-                    <option value="Hotel Issues">Hotel Issues</option>
-                    <option value="Fatigue">Fatigue</option>
-                    <option value="Crewing disputes">Crewing disputes</option>
-                    <option value="Feedback (2 sector, 12 hour days)">Feedback (2 sector, 12 hour days)</option>
-                    <option value="WHS Issue">WHS Issue</option>
-                    <option value="Other">Other</option>
-                </select>
+                <label>Report Type</label>
+                <div class="button-group">
+                    <button type="button" class="option-button" data-value="Breach of EBA">Breach of EBA</button>
+                    <button type="button" class="option-button" data-value="Rostering feedback">Rostering feedback</button>
+                    <button type="button" class="option-button" data-value="Part time 80 rosters">Part time 80 rosters</button>
+                    <button type="button" class="option-button" data-value="Safety">Safety</button>
+                    <button type="button" class="option-button" data-value="Hotel Issues">Hotel Issues</button>
+                    <button type="button" class="option-button" data-value="Fatigue">Fatigue</button>
+                    <button type="button" class="option-button" data-value="Crewing disputes">Crewing disputes</button>
+                    <button type="button" class="option-button" data-value="WHS Issue">WHS Issue</button>
+                    <button type="button" class="option-button" data-value="Other">Other</button>
+                </div>
+                <input type="hidden" id="ReportType" name="ReportType" required>
 
-                <div class="conditional-field" id="other-report-wrapper">
+                <div class="conditional-field" data-condition="ReportType" data-condition-value="Other">
                     <label for="OtherReportType">Other - Please describe report type</label>
                     <textarea id="OtherReportType" name="Other - Please describe report type" rows="3"></textarea>
                 </div>
-
-                <div class="conditional-field" id="hotel-issue-wrapper">
+                <div class="conditional-field" data-condition="ReportType" data-condition-value="Hotel Issues">
                     <label for="WhichPortAndHotel">Which port and hotel?</label>
                     <textarea id="WhichPortAndHotel" name="Which port and hotel?" rows="3"></textarea>
                 </div>
-                 <div class="conditional-field" id="eba-breach-wrapper">
+                 <div class="conditional-field" data-condition="ReportType" data-condition-value="Breach of EBA">
                     <label for="EbaClause">Which clause of the EBA do you think was breached</label>
                     <textarea id="EbaClause" name="Which clause of the EBA do you think was breached" rows="3"></textarea>
                 </div>
             </fieldset>
 
-            <fieldset>
+            <!-- Step 3: Company Reports -->
+            <fieldset class="form-step">
                 <legend>Company Reports</legend>
-                <label for="hasApiReport">Have you submitted a company API report?</label>
-                <select id="hasApiReport" name="hasApiReport">
-                    <option value="No" selected>No</option>
-                    <option value="Yes">Yes</option>
-                </select>
-                <div class="conditional-field" id="api-ref-wrapper">
+                <label>Have you submitted a company API report?</label>
+                <div class="button-group">
+                    <button type="button" class="option-button selected" data-value="No">No</button>
+                    <button type="button" class="option-button" data-value="Yes">Yes</button>
+                </div>
+                <input type="hidden" id="hasApiReport" name="hasApiReport" value="No">
+                <div class="conditional-field" data-condition="hasApiReport" data-condition-value="Yes">
                     <label for="ApiRefNumber">What is your API report reference number?</label>
                     <input type="text" id="ApiRefNumber" name="What is your API report reference number?">
                 </div>
 
-                <label for="hasFatigueReport">Have you submitted a fatigue report?</label>
-                <select id="hasFatigueReport" name="hasFatigueReport">
-                    <option value="No" selected>No</option>
-                    <option value="Yes">Yes</option>
-                </select>
-                <div class="conditional-field" id="fatigue-ref-wrapper">
+                <label>Have you submitted a fatigue report?</label>
+                <div class="button-group">
+                    <button type="button" class="option-button selected" data-value="No">No</button>
+                    <button type="button" class="option-button" data-value="Yes">Yes</button>
+                </div>
+                <input type="hidden" id="hasFatigueReport" name="hasFatigueReport" value="No">
+                <div class="conditional-field" data-condition="hasFatigueReport" data-condition-value="Yes">
                     <label for="FatigueRefNumber">What is your fatigue report reference number?</label>
                     <textarea id="FatigueRefNumber" name="What is your fatigue report reference number?" rows="2"></textarea>
                 </div>
 
-                <label for="hasSafetyReport">Have you submitted a company safety report?</label>
-                <select id="hasSafetyReport" name="hasSafetyReport">
-                    <option value="No" selected>No</option>
-                    <option value="Yes">Yes</option>
-                </select>
-                <div class="conditional-field" id="safety-ref-wrapper">
+                <label>Have you submitted a company safety report?</label>
+                <div class="button-group">
+                    <button type="button" class="option-button selected" data-value="No">No</button>
+                    <button type="button" class="option-button" data-value="Yes">Yes</button>
+                </div>
+                <input type="hidden" id="hasSafetyReport" name="hasSafetyReport" value="No">
+                <div class="conditional-field" data-condition="hasSafetyReport" data-condition-value="Yes">
                     <label for="SafetyRefNumber">What is your safety report reference number?</label>
                     <textarea id="SafetyRefNumber" name="What is your safety report reference number?" rows="2"></textarea>
                 </div>
             </fieldset>
 
-            <fieldset>
+            <!-- Step 4: Report Body & Submit -->
+            <fieldset class="form-step">
                 <legend>Report Body</legend>
                 <label for="ReportBody">Copy and paste body of Virgin Australia report here</label>
                 <textarea id="ReportBody" name="Copy and paste body of Virgin Australia report here" rows="8"></textarea>
                 
                 <label for="Attachments">Attachments <small id="attachment-note">(Online connection required)</small></label>
                 <input type="file" id="Attachments" name="Attachments">
-                
             </fieldset>
 
-            <button type="submit">Submit Report</button>
+            <!-- Navigation -->
+            <div class="form-navigation">
+                <button type="button" id="prevBtn">Back</button>
+                <button type="button" id="nextBtn">Next</button>
+                <button type="submit" id="submitBtn">Submit Report</button>
+            </div>
         </form>
 
         <section class="submissions">
@@ -128,13 +145,12 @@
                 <button id="sync-button" hidden>Sync Now</button>
                 <p id="sync-message"></p>
             </div>
-            <ul id="submission-list">
-                </ul>
+            <ul id="submission-list"></ul>
         </section>
     </main>
 
     <footer>
-        <p>Version 1.15.10.907</p>
+        <p>Version 1.15.10.955</p>
     </footer>
 
     <script src="app.js"></script>
