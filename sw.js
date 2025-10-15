@@ -1,10 +1,11 @@
-// A name for our cache - version incremented to v6 to force all updates
+// A name for our cache - version incremented to v7
 const CACHE_NAME = 'pwa-cache-v7';
 
 const FILES_TO_CACHE = [
   '.',
   'index.html',
-  'style.css',
+  // Using the new, renamed stylesheet
+  'style-v2.css',
   'app.js',
   'manifest.json'
 ];

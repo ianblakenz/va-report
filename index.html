@@ -4,29 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FAAA VA Report</title>
-    <!-- Version bumped to v3 to be absolutely sure -->
-    <link rel="stylesheet" href="style.css?v=3">
+    <!-- Using the new, renamed stylesheet -->
+    <link rel="stylesheet" href="style-v2.css">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#002a6c"/>
 </head>
 <body>
-    <!-- THIS IS THE CANARY. IF YOU CAN'T SEE THIS, YOU ARE VIEWING A CACHED FILE. -->
-    <h1 style="text-align:center; background-color:yellow; color:black;">TESTING V3</h1>
-
     <header>
         <img src="https://media.faaa.com.au/logo/faaa_logo.png" alt="FAAA Logo" class="header-logo">
         <h1>Crew Report Form</h1>
     </header>
 
     <main>
-        <!-- The rest of the form is identical... -->
         <form id="airtable-form">
+            <!-- Progress Bar -->
             <div class="progress-bar">
                 <div class="step active"></div>
                 <div class="step"></div>
                 <div class="step"></div>
                 <div class="step"></div>
             </div>
+
+            <!-- All form steps are included below... -->
             <fieldset class="form-step active-step">
                 <legend>Your Details</legend>
                 <label for="FirstName">First Name</label>
@@ -49,6 +48,7 @@
                 </div>
                 <input type="hidden" id="Base" name="Base" required>
             </fieldset>
+
             <fieldset class="form-step">
                 <legend>Report Details</legend>
                 <label>Report Type</label>
@@ -77,6 +77,7 @@
                     <textarea id="EbaClause" name="Which clause of the EBA do you think was breached" rows="3"></textarea>
                 </div>
             </fieldset>
+
             <fieldset class="form-step">
                 <legend>Company Reports</legend>
                 <label>Have you submitted a company API report?</label>
@@ -110,6 +111,7 @@
                     <textarea id="SafetyRefNumber" name="What is your safety report reference number?" rows="2"></textarea>
                 </div>
             </fieldset>
+
             <fieldset class="form-step">
                 <legend>Report Body</legend>
                 <label for="ReportBody">Copy and paste body of Virgin Australia report here</label>
@@ -117,12 +119,14 @@
                 <label for="Attachments">Attachments <small id="attachment-note">(Online connection required)</small></label>
                 <input type="file" id="Attachments" name="Attachments">
             </fieldset>
+
             <div class="form-navigation">
                 <button type="button" id="prevBtn">Back</button>
                 <button type="button" id="nextBtn">Next</button>
                 <button type="submit" id="submitBtn">Submit Report</button>
             </div>
         </form>
+
         <section class="submissions">
             <h2>Pending Submissions</h2>
             <div id="sync-status" class="sync-wrapper">
@@ -132,9 +136,11 @@
             <ul id="submission-list"></ul>
         </section>
     </main>
+
     <footer>
         <p>Version 1.0.1</p>
     </footer>
-    <script src="app.js?v=3"></script>
+
+    <script src="app.js"></script>
 </body>
 </html>
