@@ -1,4 +1,5 @@
-const CACHE_NAME = 'pwa-cache-v10';
+// A name for our cache - version incremented to v5 to force updates
+const CACHE_NAME = 'pwa-cache-v5';
 
 const FILES_TO_CACHE = [
   '.',
@@ -33,12 +34,10 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // ✅ ADDED THIS CHECK: Only handle http/https requests. Ignore chrome-extension:// etc.
   if (!event.request.url.startsWith('http')) {
       return;
   }
     
-  // Ignore non-GET requests (like the POST to Make.com)
   if (event.request.method !== 'GET') {
     return;
   }
