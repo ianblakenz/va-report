@@ -1,5 +1,5 @@
 // A name for our cache
-const CACHE_NAME = 'pwa-cache-v4'; // Incremented version to force update
+const CACHE_NAME = 'pwa-cache-v5'; // Incremented version
 
 // A list of all the files we want to cache, using relative paths
 const FILES_TO_CACHE = [
@@ -26,7 +26,6 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keyList) => {
       return Promise.all(keyList.map((key) => {
-        // Deletes old caches that are not our current CACHE_NAME
         if (key !== CACHE_NAME) {
           console.log('[ServiceWorker] Removing old cache', key);
           return caches.delete(key);
@@ -37,13 +36,17 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// This event fires every time the app makes a network request
-// Using a "Network First" strategy for easy debugging. It tries the
-// network first, and if that fails, it serves from the cache.
+// ✅ CORRECTED Fetch Handler
 self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    fetch(event.request).catch(() => {
-      return caches.match(event.request);
-    })
-  );
+  // We only want the service worker to handle navigation requests (page loads).
+  // For all other requests (like the POST to Make.com), we do nothing
+  // and let the browser handle it normally.
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request).catch(() => {
+        // If the network fails for a page load, serve the cached page
+        return caches.match('index.html');
+      })
+    );
+  }
 });
