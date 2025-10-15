@@ -1,5 +1,5 @@
 // A name for our cache
-const CACHE_NAME = 'pwa-cache-v2'; // Incremented version to force update
+const CACHE_NAME = 'pwa-cache-v3'; // Incremented version to force update
 
 // A list of all the files we want to cache, using relative paths
 const FILES_TO_CACHE = [
