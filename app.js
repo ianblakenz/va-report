@@ -31,7 +31,6 @@ function initDB() {
 // --- DOM Elements ---
 const form = document.getElementById('airtable-form');
 const submissionList = document.getElementById('submission-list');
-// ✅ UPDATED with your new Make.com webhook URL
 const webhookUrl = 'https://hook.eu1.make.com/j0vb45873j47mawzhuhc8t6k9y4276k6';
 const attachmentInput = document.getElementById('Attachments');
 const attachmentNote = document.getElementById('attachment-note');
@@ -53,10 +52,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 // --- Event Listeners ---
 form.addEventListener('submit', async (event) => {
     event.preventDefault();
-    
-    // Get the actual file object
     const file = attachmentInput.files.length > 0 ? attachmentInput.files[0] : null;
-
     const submission = {
         formData: {
             "First Name": document.getElementById('FirstName').value,
@@ -77,10 +73,8 @@ form.addEventListener('submit', async (event) => {
             "What is your safety report reference number?": document.getElementById('SafetyRefNumber').value,
             "Copy and paste body of Virgin Australia report here": document.getElementById('ReportBody').value,
         },
-        // Store the file Blob itself, not just the name
         file: file 
     };
-    
     await saveSubmission(submission);
     form.reset();
     setupConditionalFields(); 
@@ -143,26 +137,18 @@ async function syncSubmissions() {
 
     syncMessage.textContent = `Syncing ${submissions.length} report(s)...`;
     syncButton.disabled = true;
-
     for (const sub of submissions) {
-        // Use FormData to send file and text together
         const formData = new FormData();
-        
-        // Append all the text fields
         for (const key in sub.formData) {
             formData.append(key, sub.formData[key]);
         }
-        
-        // Append the file if it exists
         if (sub.file) {
-            // Make.com often looks for 'file' as the key name
             formData.append('file', sub.file, sub.file.name);
         }
-
         try {
             const response = await fetch(webhookUrl, {
                 method: 'POST',
-                body: formData // Send FormData, not JSON
+                body: formData
             });
             if (response.ok) {
                 await deleteSubmission(sub.id);
@@ -177,27 +163,36 @@ async function syncSubmissions() {
             return; 
         }
     }
-
     syncMessage.textContent = 'Sync complete!';
     syncButton.disabled = false;
     await displayPendingSubmissions();
 }
 
-// --- Database Functions ---
-async function saveSubmission(submission) {
-    const transaction = db.transaction([STORE_NAME], 'readwrite');
-    const store = transaction.objectStore(STORE_NAME);
-    store.add(submission);
-    return transaction.complete;
+// --- ✅ CORRECTED Database Functions ---
+function saveSubmission(submission) {
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction([STORE_NAME], 'readwrite');
+        transaction.onerror = (event) => reject(event.target.error);
+        const store = transaction.objectStore(STORE_NAME);
+        const request = store.add(submission);
+        request.onsuccess = () => resolve(request.result);
+    });
 }
-async function getPendingSubmissions() {
-    const transaction = db.transaction([STORE_NAME], 'readonly');
-    const store = transaction.objectStore(STORE_NAME);
-    return store.getAll();
+function getPendingSubmissions() {
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction([STORE_NAME], 'readonly');
+        transaction.onerror = (event) => reject(event.target.error);
+        const store = transaction.objectStore(STORE_NAME);
+        const request = store.getAll();
+        request.onsuccess = () => resolve(request.result);
+    });
 }
-async function deleteSubmission(id) {
-    const transaction = db.transaction([STORE_NAME], 'readwrite');
-    const store = transaction.objectStore(STORE_NAME);
-    store.delete(id);
-    return transaction.complete;
+function deleteSubmission(id) {
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction([STORE_NAME], 'readwrite');
+        transaction.onerror = (event) => reject(event.target.error);
+        const store = transaction.objectStore(STORE_NAME);
+        const request = store.delete(id);
+        request.onsuccess = () => resolve();
+    });
 }
