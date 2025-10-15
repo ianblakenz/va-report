@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FAAA VA Report</title>
-    <link rel="stylesheet" href="style.css">
+    <!-- ADDED ?v=2 to force the browser to re-download the stylesheet -->
+    <link rel="stylesheet" href="style.css?v=2">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#002a6c"/>
 </head>
@@ -24,24 +25,19 @@
                 <div class="step"></div>
             </div>
 
-            <!-- Step 1: Your Details -->
+            <!-- All form steps are included below... -->
             <fieldset class="form-step active-step">
                 <legend>Your Details</legend>
                 <label for="FirstName">First Name</label>
                 <input type="text" id="FirstName" name="FirstName" required>
-
                 <label for="LastName">Last Name</label>
                 <input type="text" id="LastName" name="LastName" required>
-
                 <label for="StaffNumber">Staff Number</label>
                 <input type="number" id="StaffNumber" name="StaffNumber" required>
-
                 <label for="Email2">Email</label>
                 <input type="email" id="Email2" name="Email2" required>
-
                 <label for="PhoneNumber">Phone Number</label>
                 <input type="tel" id="PhoneNumber" name="PhoneNumber">
-                
                 <label>Base</label>
                 <div class="button-group">
                     <button type="button" class="option-button" data-value="Melbourne">Melbourne</button>
@@ -53,7 +49,6 @@
                 <input type="hidden" id="Base" name="Base" required>
             </fieldset>
 
-            <!-- Step 2: Report Details -->
             <fieldset class="form-step">
                 <legend>Report Details</legend>
                 <label>Report Type</label>
@@ -69,7 +64,6 @@
                     <button type="button" class="option-button" data-value="Other">Other</button>
                 </div>
                 <input type="hidden" id="ReportType" name="ReportType" required>
-
                 <div class="conditional-field" data-condition="ReportType" data-condition-value="Other">
                     <label for="OtherReportType">Other - Please describe report type</label>
                     <textarea id="OtherReportType" name="Other - Please describe report type" rows="3"></textarea>
@@ -84,7 +78,6 @@
                 </div>
             </fieldset>
 
-            <!-- Step 3: Company Reports -->
             <fieldset class="form-step">
                 <legend>Company Reports</legend>
                 <label>Have you submitted a company API report?</label>
@@ -97,7 +90,6 @@
                     <label for="ApiRefNumber">What is your API report reference number?</label>
                     <input type="text" id="ApiRefNumber" name="What is your API report reference number?">
                 </div>
-
                 <label>Have you submitted a fatigue report?</label>
                 <div class="button-group">
                     <button type="button" class="option-button selected" data-value="No">No</button>
@@ -108,7 +100,6 @@
                     <label for="FatigueRefNumber">What is your fatigue report reference number?</label>
                     <textarea id="FatigueRefNumber" name="What is your fatigue report reference number?" rows="2"></textarea>
                 </div>
-
                 <label>Have you submitted a company safety report?</label>
                 <div class="button-group">
                     <button type="button" class="option-button selected" data-value="No">No</button>
@@ -121,17 +112,14 @@
                 </div>
             </fieldset>
 
-            <!-- Step 4: Report Body & Submit -->
             <fieldset class="form-step">
                 <legend>Report Body</legend>
                 <label for="ReportBody">Copy and paste body of Virgin Australia report here</label>
                 <textarea id="ReportBody" name="Copy and paste body of Virgin Australia report here" rows="8"></textarea>
-                
                 <label for="Attachments">Attachments <small id="attachment-note">(Online connection required)</small></label>
                 <input type="file" id="Attachments" name="Attachments">
             </fieldset>
 
-            <!-- Navigation -->
             <div class="form-navigation">
                 <button type="button" id="prevBtn">Back</button>
                 <button type="button" id="nextBtn">Next</button>
@@ -150,9 +138,10 @@
     </main>
 
     <footer>
-        <p>Version 1.15.10.1005</p>
+        <p>Version 1.0.1</p>
     </footer>
 
-    <script src="app.js"></script>
+    <!-- ADDED ?v=2 to force the browser to re-download the script -->
+    <script src="app.js?v=2"></script>
 </body>
 </html>
