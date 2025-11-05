@@ -36,25 +36,25 @@ const prevBtn = document.getElementById('prevBtn');
 const nextBtn = document.getElementById('nextBtn');
 const submitBtn = document.getElementById('submitBtn');
 const progressSteps = Array.from(document.querySelectorAll('.progress-bar .step'));
-const saveDetailsBtn = document.getElementById('saveDetailsBtn'); // NEW
+const saveDetailsBtn = document.getElementById('saveDetailsBtn');
 let currentStep = 0;
 
 // --- App Initialization ---
 document.addEventListener('DOMContentLoaded', async () => {
     try {
         await initDB();
-        loadUserDetails(); // NEW: Load saved details on start
+        loadUserDetails();
         setupButtonGroups();
         setupMultiStepForm();
         await displayPendingSubmissions();
         handleConnectionChange(); 
-        saveDetailsBtn.addEventListener('click', saveUserDetails); // NEW
+        saveDetailsBtn.addEventListener('click', saveUserDetails);
     } catch (error) {
         console.error("Initialization failed:", error);
     }
 });
 
-// --- NEW: Save/Load User Details ---
+// --- Save/Load User Details (No Changes) ---
 function saveUserDetails(e) {
     if (e) e.preventDefault();
     const details = {
@@ -132,9 +132,51 @@ function handleConditionalFields(inputId, selectedValue) {
     });
 }
 
-// --- Form Submission (Updated Reset Logic) ---
+// --- NEW HELPER: Reusable form reset function ---
+function resetForm() {
+    form.reset(); // Resets all fields
+    loadUserDetails(); // Repopulates saved details
+    currentStep = 0;
+    showStep(currentStep);
+    
+    // De-select all buttons
+    document.querySelectorAll('.option-button.selected').forEach(b => b.classList.remove('selected'));
+    // Re-select the default "No" buttons
+    document.getElementById('hasApiReport').previousElementSibling.querySelector('[data-value="No"]').classList.add('selected');
+    document.getElementById('hasFatigueReport').previousElementSibling.querySelector('[data-value="No"]').classList.add('selected');
+    document.getElementById('hasSafetyReport').previousElementSibling.querySelector('[data-value="No"]').classList.add('selected');
+}
+
+// --- NEW HELPER: Reusable save and reset function ---
+async function saveAndReset(submission) {
+    await saveSubmission(submission);
+    resetForm();
+    await displayPendingSubmissions(); // Show it in the pending list
+}
+
+// --- NEW HELPER: Reusable send function ---
+async function sendSubmission(submission) {
+    const formData = new FormData();
+    for (const key in submission.formData) {
+        formData.append(key, submission.formData[key]);
+    }
+    if (submission.file) {
+        formData.append('file', submission.file, submission.file.name);
+    }
+    // Return the fetch promise
+    return fetch(webhookUrl, {
+        method: 'POST',
+        body: formData
+    });
+}
+
+// --- UPDATED: Form Submission Logic ---
 form.addEventListener('submit', async (event) => {
     event.preventDefault();
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Submitting...';
+
+    // 1. Gather all data
     const file = attachmentInput.files.length > 0 ? attachmentInput.files[0] : null;
     const submission = {
         formData: {
@@ -158,37 +200,55 @@ form.addEventListener('submit', async (event) => {
         },
         file: file 
     };
-    await saveSubmission(submission);
-    
-    // UPDATED: Smart form reset
-    form.reset(); // Resets all fields
-    loadUserDetails(); // Repopulates saved details
-    currentStep = 0;
-    showStep(currentStep);
-    
-    // De-select all buttons
-    document.querySelectorAll('.option-button.selected').forEach(b => b.classList.remove('selected'));
-    // Re-select the default "No" buttons for reports
-    document.getElementById('hasApiReport').previousElementSibling.querySelector('[data-value="No"]').classList.add('selected');
-    document.getElementById('hasFatigueReport').previousElementSibling.querySelector('[data-value="No"]').classList.add('selected');
-    document.getElementById('hasSafetyReport').previousElementSibling.querySelector('[data-value="No"]').classList.add('selected');
-    
-    await displayPendingSubmissions();
+
+    // 2. Check connection and attempt to send
+    if (navigator.onLine) {
+        try {
+            const response = await sendSubmission(submission);
+            if (response.ok) {
+                // SUCCESS! Sent directly.
+                console.log('Submission sent directly to webhook.');
+                resetForm();
+            } else {
+                // Server error (e.g., 500)
+                // Treat as offline, save locally
+                console.warn('Server error, saving submission locally.');
+                await saveAndReset(submission);
+            }
+        } catch (error) {
+            // Network error (e.g., failed to fetch)
+            // Treat as offline, save locally
+            console.warn('Network error, saving submission locally.', error);
+            await saveAndReset(submission);
+        }
+    } else {
+        // We are OFFLINE. Save locally.
+        console.log('Offline, saving submission locally.');
+        await saveAndReset(submission);
+    }
+
+    // Re-enable the button
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Submit Report';
 });
 
 syncButton.addEventListener('click', syncSubmissions);
 window.addEventListener('online', handleConnectionChange);
 window.addEventListener('offline', handleConnectionChange);
 
-// --- Connection Handling (UPDATED) ---
+// --- UPDATED: Connection Handling (Now with Auto-Sync) ---
 function handleConnectionChange() {
     const isOnline = navigator.onLine;
     
-    // UPDATED: Allow offline file input
-    // attachmentInput.disabled = !isOnline; // <-- REMOVED
-    attachmentNote.textContent = isOnline ? '(File will be uploaded)' : '(Offline supported, file will be saved)'; // <-- UPDATED
+    attachmentNote.textContent = isOnline ? '(File will be uploaded)' : '(Offline supported, file will be saved)';
     
-    displayPendingSubmissions(); 
+    displayPendingSubmissions(); // This will show/hide the sync button
+
+    // NEW: Auto-sync when connection is restored
+    if (isOnline) {
+        console.log('Connection restored. Attempting to sync pending submissions...');
+        syncSubmissions();
+    }
 }
 
 async function displayPendingSubmissions() {
@@ -209,34 +269,29 @@ async function displayPendingSubmissions() {
     }
 }
 
-// --- Sync Logic (No Changes) ---
+// --- UPDATED: Sync Logic (Now uses reusable send function) ---
 async function syncSubmissions() {
     const submissions = await getPendingSubmissions();
     if (submissions.length === 0 || !navigator.onLine) return;
 
     syncMessage.textContent = `Syncing ${submissions.length} report(s)...`;
     syncButton.disabled = true;
+
     for (const sub of submissions) {
-        const formData = new FormData();
-        for (const key in sub.formData) {
-            formData.append(key, sub.formData[key]);
-        }
-        if (sub.file) {
-            formData.append('file', sub.file, sub.file.name);
-        }
         try {
-            const response = await fetch(webhookUrl, {
-                method: 'POST',
-                body: formData
-            });
+            // Use the new reusable function
+            const response = await sendSubmission(sub); 
+            
             if (response.ok) {
                 await deleteSubmission(sub.id);
             } else {
+                // Server error, stop trying for now
                 syncMessage.textContent = `Error: ${response.statusText}. Submission failed.`;
                 syncButton.disabled = false;
                 return; 
             }
         } catch (error) {
+            // Network error, stop trying
             syncMessage.textContent = 'Sync failed. Check console for errors.';
             syncButton.disabled = false;
             return; 

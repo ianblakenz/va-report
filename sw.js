@@ -1,5 +1,5 @@
 // A name for our cache - version incremented to v7
-const CACHE_NAME = 'pwa-cache-v9';
+const CACHE_NAME = 'pwa-cache-v10';
 
 const FILES_TO_CACHE = [
   '.',
