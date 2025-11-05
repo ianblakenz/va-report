@@ -1,20 +1,20 @@
 {
-  "name": "Offline Crew Report",
-  "short_name": "Crew Report",
+  "name": "FAAA VAA Crew Reporting",
+  "short_name": "FAAA VA REPORT",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#F1F3F4",
   "theme_color": "#512698",
-  "description": "An offline-first crew reporting form.",
+  "description": "Offline reporting tool for FAAA members",
   "icons": [
     {
-      "src": "https://www.gstatic.com/images/branding/product/1x/drive_2020q4_48dp.png",
-      "sizes": "48x48",
+      "src": "https://media.faaa.com.au/apps/crew-rest-faaa-app.png",
+      "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "https://www.gstatic.com/images/branding/product/1x/drive_2020q4_96dp.png",
-      "sizes": "96x96",
+      "src": "https://media.faaa.com.au/apps/crew-rest-faaa-app.png",
+      "sizes": "512x512",
       "type": "image/png"
     }
   ]
