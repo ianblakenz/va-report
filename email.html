@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>FAAA Crew Report Submission</title>
+    <style>
+        body { margin: 0; padding: 0; background-color: #F4F6FE; font-family: Arial, Helvetica, sans-serif; }
+    </style>
+</head>
+<body style="margin: 0; padding: 0; background-color: #F4F6FE; font-family: Arial, Helvetica, sans-serif;">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+        <tr>
+            <td align="center" style="padding: 20px 10px;">
+                <table border="0" cellpadding="0" cellspacing="0" width="600">
+                    <!-- Header Section -->
+                    <tr>
+                        <td align="center" style="padding: 20px 0 30px 0;">
+                            <img src="https://media.faaa.com.au/logo/faaa_logo.png" alt="FAAA Logo" width="180" style="display: block;">
+                        </td>
+                    </tr>
+
+                    <!-- Main Title Card -->
+                    <tr>
+                        <td align="center" style="background-color: #002a6c; color: #FFFFFF; padding: 30px; border-radius: 12px 12px 0 0;">
+                            <h1 style="margin: 0; font-size: 28px;">New Crew Report Submission</h1>
+                        </td>
+                    </tr>
+
+                    <!-- Submitter Details Card -->
+                    <tr>
+                        <td style="background-color: #FFFFFF; padding: 30px; border-radius: 0 0 12px 12px; box-shadow: 0 4px 10px rgba(0, 42, 108, 0.1);">
+                            <h2 style="color: #002a6c; margin-top: 0; margin-bottom: 20px; font-size: 20px; border-bottom: 1px solid #D8DCE6; padding-bottom: 10px;">Submitter Details</h2>
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="color: #002a6c; font-size: 16px;">
+                                <tr>
+                                    <td style="padding: 8px 0; font-weight: bold; width: 150px; color: #6B7280;">Full Name:</td>
+                                    <td style="padding: 8px 0;">{{1.`First Name`}} {{1.`Last Name`}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; font-weight: bold; color: #6B7280;">Staff Number:</td>
+                                    <td style="padding: 8px 0;">{{1.`Staff Number`}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; font-weight: bold; color: #6B7280;">Email:</td>
+                                    <td style="padding: 8px 0;">{{1.`Email 2`}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; font-weight: bold; color: #6B7280;">Phone:</td>
+                                    <td style="padding: 8px 0;">{{1.`Phone Number `}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; font-weight: bold; color: #6B7280;">Base:</td>
+                                    <td style="padding: 8px 0;">{{1.Base}}</td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Spacer -->
+                    <tr><td height="20"></td></tr>
+
+                    <!-- Report Details Card -->
+                    <tr>
+                        <td style="background-color: #FFFFFF; padding: 30px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0, 42, 108, 0.1);">
+                            <h2 style="color: #002a6c; margin-top: 0; margin-bottom: 20px; font-size: 20px; border-bottom: 1px solid #D8DCE6; padding-bottom: 10px;">Report Details</h2>
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="color: #002a6c; font-size: 16px;">
+                                <tr>
+                                    <td style="padding: 8px 0; font-weight: bold; width: 150px; color: #6B7280;">Report Type:</td>
+                                    <td style="padding: 8px 0;">{{1.`Report Type`}}</td>
+                                </tr>
+                                <!-- Conditional Fields would be handled by Make.com logic -->
+                                <tr>
+                                    <td colspan="2" style="padding-top: 15px;">
+                                        <strong style="color: #6B7280;">Other Report Description:</strong><br>
+                                        <p style="margin: 5px 0 0 0; white-space: pre-wrap; line-height: 1.5;">{{1.`Other - Please describe report type`}}</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" style="padding-top: 15px;">
+                                        <strong style="color: #6B7280;">Hotel & Port Details:</strong><br>
+                                        <p style="margin: 5px 0 0 0; white-space: pre-wrap; line-height: 1.5;">{{1.`Which port and hotel?`}}</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" style="padding-top: 15px;">
+                                        <strong style="color: #6B7280;">EBA Clause Breached:</strong><br>
+                                        <p style="margin: 5px 0 0 0; white-space: pre-wrap; line-height: 1.5;">{{1.`Which clause of the EBA do you think was breached`}}</p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    <!-- Spacer -->
+                    <tr><td height="20"></td></tr>
+
+                    <!-- Report Body Card -->
+                     <tr>
+                        <td style="background-color: #FFFFFF; padding: 30px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0, 42, 108, 0.1);">
+                            <h2 style="color: #002a6c; margin-top: 0; margin-bottom: 20px; font-size: 20px; border-bottom: 1px solid #D8DCE6; padding-bottom: 10px;">Report Body</h2>
+                            <p style="color: #333; white-space: pre-wrap; line-height: 1.6; font-size: 16px;">{{1.`Copy and paste body of Virgin Australia report here`}}</p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Spacer -->
+                    <tr><td height="20"></td></tr>
+
+                    <!-- Company Reports Card -->
+                    <tr>
+                        <td style="background-color: #FFFFFF; padding: 30px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0, 42, 108, 0.1);">
+                            <h2 style="color: #002a6c; margin-top: 0; margin-bottom: 20px; font-size: 20px; border-bottom: 1px solid #D8DCE6; padding-bottom: 10px;">Company Reports Submitted</h2>
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="color: #002a6c; font-size: 16px;">
+                                <tr>
+                                    <td style="padding: 8px 0; font-weight: bold; color: #6B7280;">API Report:</td>
+                                    <td style="padding: 8px 0;">{{1.`Have you submitted a company API report?`}} (Ref: {{1.`What is your API report reference number?`}})</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; font-weight: bold; color: #6B7280;">Fatigue Report:</td>
+                                    <td style="padding: 8px 0;">{{1.`Have you submitted a fatigue report?`}} (Ref: {{1.`What is your fatigue report reference number?`}})</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; font-weight: bold; color: #6B7280;">Safety Report:</td>
+                                    <td style="padding: 8px 0;">{{1.`Have you submitted a company safety report?`}} (Ref: {{1.`What is your safety report reference number?`}})</td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Footer Section -->
+                    <tr>
+                        <td align="center" style="padding: 40px 20px 20px 20px; font-size: 12px; color: #6B7280;">
+                            This email was generated automatically from the FAAA VA Crew Report App.
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+
