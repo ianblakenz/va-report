@@ -36,22 +36,53 @@ const prevBtn = document.getElementById('prevBtn');
 const nextBtn = document.getElementById('nextBtn');
 const submitBtn = document.getElementById('submitBtn');
 const progressSteps = Array.from(document.querySelectorAll('.progress-bar .step'));
+const saveDetailsBtn = document.getElementById('saveDetailsBtn'); // NEW
 let currentStep = 0;
 
 // --- App Initialization ---
 document.addEventListener('DOMContentLoaded', async () => {
     try {
         await initDB();
+        loadUserDetails(); // NEW: Load saved details on start
         setupButtonGroups();
-        setupMultiStepForm(); // Corrected function call
+        setupMultiStepForm();
         await displayPendingSubmissions();
         handleConnectionChange(); 
+        saveDetailsBtn.addEventListener('click', saveUserDetails); // NEW
     } catch (error) {
         console.error("Initialization failed:", error);
     }
 });
 
-// ✅ CORRECTED FUNCTION NAME
+// --- NEW: Save/Load User Details ---
+function saveUserDetails(e) {
+    if (e) e.preventDefault();
+    const details = {
+        firstName: document.getElementById('FirstName').value,
+        lastName: document.getElementById('LastName').value,
+        staffNumber: document.getElementById('StaffNumber').value,
+        email: document.getElementById('Email2').value,
+        phone: document.getElementById('PhoneNumber').value
+    };
+    localStorage.setItem('userDetails', JSON.stringify(details));
+    saveDetailsBtn.textContent = 'Details Saved!';
+    setTimeout(() => {
+        saveDetailsBtn.textContent = 'Save My Details';
+    }, 2000);
+}
+
+function loadUserDetails() {
+    const details = JSON.parse(localStorage.getItem('userDetails'));
+    if (details) {
+        document.getElementById('FirstName').value = details.firstName || '';
+        document.getElementById('LastName').value = details.lastName || '';
+        document.getElementById('StaffNumber').value = details.staffNumber || '';
+        document.getElementById('Email2').value = details.email || '';
+        document.getElementById('PhoneNumber').value = details.phone || '';
+    }
+}
+
+// --- Multi-Step Form (No Changes) ---
 function setupMultiStepForm() {
     showStep(currentStep);
     nextBtn.addEventListener('click', () => {
@@ -101,6 +132,7 @@ function handleConditionalFields(inputId, selectedValue) {
     });
 }
 
+// --- Form Submission (Updated Reset Logic) ---
 form.addEventListener('submit', async (event) => {
     event.preventDefault();
     const file = attachmentInput.files.length > 0 ? attachmentInput.files[0] : null;
@@ -127,10 +159,20 @@ form.addEventListener('submit', async (event) => {
         file: file 
     };
     await saveSubmission(submission);
-    form.reset();
+    
+    // UPDATED: Smart form reset
+    form.reset(); // Resets all fields
+    loadUserDetails(); // Repopulates saved details
     currentStep = 0;
     showStep(currentStep);
+    
+    // De-select all buttons
     document.querySelectorAll('.option-button.selected').forEach(b => b.classList.remove('selected'));
+    // Re-select the default "No" buttons for reports
+    document.getElementById('hasApiReport').previousElementSibling.querySelector('[data-value="No"]').classList.add('selected');
+    document.getElementById('hasFatigueReport').previousElementSibling.querySelector('[data-value="No"]').classList.add('selected');
+    document.getElementById('hasSafetyReport').previousElementSibling.querySelector('[data-value="No"]').classList.add('selected');
+    
     await displayPendingSubmissions();
 });
 
@@ -138,10 +180,14 @@ syncButton.addEventListener('click', syncSubmissions);
 window.addEventListener('online', handleConnectionChange);
 window.addEventListener('offline', handleConnectionChange);
 
+// --- Connection Handling (UPDATED) ---
 function handleConnectionChange() {
     const isOnline = navigator.onLine;
-    attachmentInput.disabled = !isOnline;
-    attachmentNote.textContent = isOnline ? '(File will be uploaded)' : '(Attachments disabled while offline)';
+    
+    // UPDATED: Allow offline file input
+    // attachmentInput.disabled = !isOnline; // <-- REMOVED
+    attachmentNote.textContent = isOnline ? '(File will be uploaded)' : '(Offline supported, file will be saved)'; // <-- UPDATED
+    
     displayPendingSubmissions(); 
 }
 
@@ -163,6 +209,7 @@ async function displayPendingSubmissions() {
     }
 }
 
+// --- Sync Logic (No Changes) ---
 async function syncSubmissions() {
     const submissions = await getPendingSubmissions();
     if (submissions.length === 0 || !navigator.onLine) return;
@@ -200,6 +247,7 @@ async function syncSubmissions() {
     await displayPendingSubmissions();
 }
 
+// --- IndexedDB Functions (No Changes) ---
 function saveSubmission(submission) {
     return new Promise((resolve, reject) => {
         const transaction = db.transaction([STORE_NAME], 'readwrite');

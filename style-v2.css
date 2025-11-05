@@ -1,24 +1,27 @@
 :root {
-    --faaa-bg: #F4F6FE;
-    --faaa-blue: #002a6c;
-    --faaa-light-grey: #D8DCE6;
-    --faaa-medium-grey: #6B7280;
-    --faaa-white: #FFFFFF;
+    /* NEW: Virgin Australia Brand Palette */
+    --va-purple: #512698;
+    --va-pink: #D6083B;
+    --va-bg-light: #F4F6FE; /* Kept light bg from original */
+    --va-grey-light: #D8DCE6;
+    --va-text-primary: #222;
+    --va-text-secondary: #6B7280;
+    --va-white: #FFFFFF;
     --status-pending: #ffa500;
 }
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     margin: 0;
-    background-color: var(--faaa-bg);
-    color: var(--faaa-blue);
+    background-color: var(--va-bg-light);
+    color: var(--va-text-primary);
 }
 
 header {
-    background-color: var(--faaa-white);
+    background-color: var(--va-white);
     padding: 1em;
     text-align: center;
-    border-bottom: 1px solid var(--faaa-light-grey);
+    border-bottom: 1px solid var(--va-grey-light);
 }
 .header-logo {
     max-width: 180px;
@@ -27,7 +30,7 @@ header {
 header h1 {
     margin: 0;
     font-size: 1.5em;
-    color: var(--faaa-blue);
+    color: var(--va-purple); /* Updated color */
 }
 
 main {
@@ -37,7 +40,7 @@ main {
 }
 
 form {
-    background: var(--faaa-white);
+    background: var(--va-white);
     padding: 2em;
     border-radius: 12px;
     box-shadow: 0 4px 10px rgba(0, 42, 108, 0.05);
@@ -54,12 +57,12 @@ form {
 .step {
     flex: 1;
     height: 6px;
-    background-color: var(--faaa-light-grey);
+    background-color: var(--va-grey-light);
     border-radius: 3px;
     transition: background-color 0.3s ease;
 }
 .step.active {
-    background-color: var(--faaa-blue);
+    background-color: var(--va-purple); /* Updated color */
 }
 
 /* Form Steps */
@@ -84,29 +87,34 @@ legend {
     padding: 0;
     margin-bottom: 1em;
     width: 100%;
-    border-bottom: 1px solid var(--faaa-light-grey);
+    border-bottom: 1px solid var(--va-grey-light);
     padding-bottom: 0.5em;
+    color: var(--va-purple); /* Updated color */
 }
 
 label {
     display: block;
     margin-bottom: 0.5em;
     font-weight: bold;
-    color: var(--faaa-medium-grey);
+    color: var(--va-text-secondary);
 }
+label small {
+    font-weight: normal;
+}
+
 
 input, textarea {
     width: 100%;
     padding: 0.8em;
     margin-bottom: 1.2em;
-    border: 1px solid var(--faaa-light-grey);
+    border: 1px solid var(--va-grey-light);
     border-radius: 8px;
     box-sizing: border-box;
     font-size: 1em;
 }
 input:focus, textarea:focus {
-    outline: 2px solid var(--faaa-blue);
-    border-color: var(--faaa-blue);
+    outline: 2px solid var(--va-pink); /* Updated color */
+    border-color: var(--va-purple); /* Updated color */
 }
 
 /* Button-based Dropdowns */
@@ -119,9 +127,9 @@ input:focus, textarea:focus {
 .option-button {
     flex-grow: 1;
     padding: 0.8em 1em;
-    background-color: var(--faaa-bg);
-    color: var(--faaa-blue);
-    border: 1px solid var(--faaa-light-grey);
+    background-color: var(--va-bg-light);
+    color: var(--va-purple); /* Updated color */
+    border: 1px solid var(--va-grey-light);
     border-radius: 8px;
     cursor: pointer;
     font-size: 0.9em;
@@ -129,9 +137,28 @@ input:focus, textarea:focus {
     transition: background-color 0.2s, color 0.2s;
 }
 .option-button.selected {
-    background-color: var(--faaa-blue);
-    color: var(--faaa-white);
-    border-color: var(--faaa-blue);
+    background-color: var(--va-pink); /* Updated color */
+    color: var(--va-white);
+    border-color: var(--va-pink); /* Updated color */
+}
+
+/* NEW: Save Details Button Style */
+.save-button {
+    display: block;
+    width: 100%;
+    padding: 0.8em 1em;
+    margin: 0.5em 0 1.5em 0;
+    font-weight: bold;
+    font-size: 0.9em;
+    background-color: transparent;
+    border: 2px solid var(--va-purple);
+    color: var(--va-purple);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.save-button:hover {
+    background-color: var(--va-bg-light);
 }
 
 /* Navigation */
@@ -139,7 +166,7 @@ input:focus, textarea:focus {
     display: flex;
     justify-content: space-between;
     margin-top: 2em;
-    border-top: 1px solid var(--faaa-light-grey);
+    border-top: 1px solid var(--va-grey-light);
     padding-top: 1.5em;
 }
 .form-navigation button {
@@ -151,19 +178,20 @@ input:focus, textarea:focus {
     font-weight: bold;
 }
 #prevBtn {
-    background-color: var(--faaa-light-grey);
-    color: var(--faaa-blue);
+    background-color: var(--va-grey-light);
+    color: var(--va-text-primary);
 }
 #nextBtn, #submitBtn {
-    background-color: var(--faaa-blue);
-    color: var(--faaa-white);
+    background-color: var(--va-purple); /* Updated color */
+    color: var(--va-white);
 }
 
 /* Conditional and Pending Sections */
 .conditional-field { display: none; margin-top: 1em; }
 .submissions { margin-top: 2em; }
+#submission-list { padding-left: 0; }
 #submission-list li {
-    background: var(--faaa-white);
+    background: var(--va-white);
     padding: 1em; margin-bottom: 0.5em;
     border-radius: 8px; list-style: none;
     display: flex; justify-content: space-between; align-items: center;

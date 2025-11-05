@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FAAA VA Report</title>
-    <link rel="stylesheet" href="style-v2.css">
+    <link rel="stylesheet" href="style-v2.css"> 
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#002a6c"/>
+    <meta name="theme-color" content="#512698"/>
 </head>
 <body>
     <header>
@@ -16,7 +16,6 @@
 
     <main>
         <form id="airtable-form">
-            <!-- Progress Bar -->
             <div class="progress-bar">
                 <div class="step active"></div>
                 <div class="step"></div>
@@ -24,7 +23,6 @@
                 <div class="step"></div>
             </div>
 
-            <!-- All form steps are included below... -->
             <fieldset class="form-step active-step">
                 <legend>Your Details</legend>
                 <label for="FirstName">First Name</label>
@@ -37,6 +35,9 @@
                 <input type="email" id="Email2" name="Email2" required>
                 <label for="PhoneNumber">Phone Number</label>
                 <input type="tel" id="PhoneNumber" name="PhoneNumber">
+                
+                <button type="button" id="saveDetailsBtn" class="save-button">Save My Details</button>
+
                 <label>Base</label>
                 <div class="button-group">
                     <button type="button" class="option-button" data-value="Melbourne">Melbourne</button>
@@ -115,8 +116,9 @@
                 <legend>Report Body</legend>
                 <label for="ReportBody">Copy and paste body of Virgin Australia report here</label>
                 <textarea id="ReportBody" name="Copy and paste body of Virgin Australia report here" rows="8"></textarea>
-                <label for="Attachments">Attachments <small id="attachment-note">(Online connection required)</small></label>
-                <input type="file" id="Attachments" name="Attachments">
+                <label for="Attachments">Attachments</label>
+                <small id="attachment-note">(Offline supported, file will be saved)</small>
+                <input type="file" id="Attachments" name="Attachments" style="margin-top: 0.5em;">
             </fieldset>
 
             <div class="form-navigation">
